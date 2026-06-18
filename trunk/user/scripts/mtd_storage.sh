@@ -316,14 +316,12 @@ else
         /usr/bin/sqm-qos stop
     fi
 fi
-EOF
 
 #wing resume
 
 EOF
 		chmod 755 "$script_postf"
 	fi
-
 	# create post-wan script
 	if [ ! -f "$script_postw" ] ; then
 		cat > "$script_postw" <<EOF
