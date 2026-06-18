@@ -1,4 +1,4 @@
-<!--本页面文件部分内容提取自灯大固件-->
+<!--Some content of this page is extracted from Deng's firmware-->
 <!DOCTYPE html>
 <html>
 <head>
@@ -150,17 +150,17 @@ function getHash(){
                             <ul class="nav nav-tabs" style="margin-bottom: 10px;">
                                 
                                 <li class="active">
-                                    <a href="Advanced_SQM.asp">SQM QOS</a>
+                                    <a href="Advanced_SQM.asp">SQM QoS</a>
                                 </li>
                             </ul>
                         </div>
                                     <div class="row-fluid">
                                         <div id="tabMenu" class="submenuBlock"></div>
                                         <div class="alert alert-info" style="margin: 10px;">
-                          注意:SQM会自动设置相应的HWNAT规则，请勿自行调整WAN页面的HWNAT选项造成流控失效</br>
-				因7621性能所限,大于500M宽带谨慎开启QOS！</br>
-            通过SQM_QoS您可以：对指定接口流量整形,例如自定义5G访客网络。其他接口如5G主接口不会受到影响。</br>
-                                       访客网络接口名称视机型而定，5G访客：ra1(或rai1） 2.4G访客rax1(或ra1)。
+                          Note: SQM will automatically set the corresponding HWNAT rules. Do not manually adjust HWNAT options on the WAN page, otherwise QoS will fail.</br>
+				Due to MT7621 hardware limits, please use QoS with caution on bandwidths exceeding 500Mbps!</br>
+            With SQM QoS you can: Shape traffic on specified interfaces, such as a custom 5G guest network. Other interfaces (like the main 5G interface) will not be affected.</br>
+                                       Guest network interface names vary by model: 5G Guest is ra1 (or rai1), 2.4G Guest is rax1 (or ra1).
                                         </div>
                                    </div>
 
@@ -174,7 +174,7 @@ function getHash(){
                                             </td>
                                             </tr>
                                             <tr>
-                                                <th>启用SQM</th>
+                                                <th>Enable SQM</th>
                                                 <td colspan="2">
                                                     <div class="main_itoggle">
                                                         <div id="sqm_enable_on_of">
@@ -190,27 +190,27 @@ function getHash(){
                                                 </td>
                                             </tr>
                                               <tr>
-                                            <th>流控对象</th>
+                                            <th>QoS Target</th>
                                             <td>
                                                 <select name="sqm_flag" class="input">
-                                                    <option value="1" <% nvram_match_x("", "sqm_flag", "1", "selected"); %>>仅有线到外网</option>
-                                                    <option value="2" <% nvram_match_x("", "sqm_flag", "2", "selected"); %>>仅无线到外网</option>
-                                                    <option value="3" <% nvram_match_x("", "sqm_flag", "3", "selected"); %>>有线到外网+无线到外网</option>
-                                                    <option value="4" <% nvram_match_x("", "sqm_flag", "4", "selected"); %>>自定义接口</option>
+                                                    <option value="1" <% nvram_match_x("", "sqm_flag", "1", "selected"); %>>Wired to WAN only</option>
+                                                    <option value="2" <% nvram_match_x("", "sqm_flag", "2", "selected"); %>>Wireless to WAN only</option>
+                                                    <option value="3" <% nvram_match_x("", "sqm_flag", "3", "selected"); %>>Wired + Wireless to WAN</option>
+                                                    <option value="4" <% nvram_match_x("", "sqm_flag", "4", "selected"); %>>Custom Interface</option>
                                                 </select>
                                             </td>
                                         </tr>
                                             <tr>
-                                                <th>自定义接口</th>
+                                                <th>Custom Interface</th>
                                                 <td>
                                                     <input type="text" maxlength="10" class="input" size="10" name="sqm_active" value="<% nvram_get_x("","sqm_active"); %>"/>
                                                 </td>
                                                 <td>
-                                                    &nbsp;<span style="color:#888;">上项菜单需选择“自定义接口“ 可填写例如:ra0</span>
+                                                    &nbsp;<span style="color:#888;">Requires selecting "Custom Interface" above. e.g., ra0</span>
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th>队列规则</th>
+                                                <th>Queue Discipline (Qdisc)</th>
                                                 <td>
                                                     <select name="sqm_qdisc" class="input">
                                                         <option value="fq_codel" <% nvram_match_x("","sqm_qdisc", "fq_codel","selected"); %>>fq_codel (*)</option>
@@ -221,7 +221,7 @@ function getHash(){
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th>队列脚本</th>
+                                                <th>Queue Script</th>
                                                 <td>
                                                     <select name="sqm_script" class="input">
                                                         <option value="simple.qos" <% nvram_match_x("","sqm_script", "simple.qos","selected"); %>>simple (*)</option>
@@ -233,24 +233,98 @@ function getHash(){
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th width="32%">宽带下载速度 (<span class="label label-info">kbit/s</span>)</th>
+                                                <th width="32%">Download Speed (<span class="label label-info">kbit/s</span>)</th>
                                                 <td>
                                                     <input type="text" maxlength="10" class="input" size="10" id="sqm_down_speed" name="sqm_down_speed" value="<% nvram_get_x("","sqm_down_speed"); %>"/>
                                                 </td>
                                                 <td>
-                                                    <a href="#bw_calc_dialog" class="btn btn-info" data-toggle="modal">速度计算器</a>
+                                                    <a href="#bw_calc_dialog" class="btn btn-info" data-toggle="modal">Speed Calculator</a>
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th width="32%">宽带上传速度 (<span class="label label-info">kbit/s</span>)</th>
+                                                <th width="32%">Upload Speed (<span class="label label-info">kbit/s</span>)</th>
                                                 <td>
                                                     <input type="text" maxlength="10" class="input" size="10" id="sqm_up_speed" name="sqm_up_speed" value="<% nvram_get_x("","sqm_up_speed"); %>"/>
                                                 </td>
                                                 <td>
-                                                    &nbsp;<span style="color:#888;">测速的80-95％，1 Mbps = 1024 kbit/s 需填写小于下载速度的值</span>
+                                                    &nbsp;<span style="color:#888;">Set to 80-95% of real speed. 1 Mbps = 1024 kbit/s. Recommend setting less than download speed.</span>
                                                 </td>
                                             </tr>
                                             <tr>
+                                                <th>Enable Log</th>
+                                                <td>
+                                                    <div class="main_itoggle">
+                                                        <div id="sqm_debug_log_on_of">
+                                                            <input type="checkbox" id="sqm_debug_log_fake"
+                                                            <% nvram_match_x("", "sqm_debug_log", "1", "value=1 checked"); %><% nvram_match_x("", "sqm_debug_log", "0", "value=0"); %>
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div style="position: absolute; margin-left: -10000px;">
+                                                        <input type="radio" value="1" name="sqm_debug_log" id="sqm_debug_log_1" class="input" value="1" <% nvram_match_x("", "sqm_debug_log", "1", "checked"); %> /> Yes
+                                                        <input type="radio" value="0" name="sqm_debug_log" id="sqm_debug_log_0" class="input" value="0" <% nvram_match_x("", "sqm_debug_log", "0", "checked"); %> /> No
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    &nbsp;<span style="color:#888;">/var/run/sqm/<% nvram_get_x("","sqm_active"); %>.debug.log</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>Log Level</th>
+                                                <td>
+                                                    <select name="sqm_log_level" class="input">
+                                                        <option value="0" <% nvram_match_x("","sqm_log_level", "0","selected"); %>>silent</option>
+                                                        <option value="1" <% nvram_match_x("","sqm_log_level", "1","selected"); %>>error</option>
+                                                        <option value="2" <% nvram_match_x("","sqm_log_level", "2","selected"); %>>warn</option>
+                                                        <option value="5" <% nvram_match_x("","sqm_log_level", "5","selected"); %>>info (*)</option>
+                                                        <option value="8" <% nvram_match_x("","sqm_log_level", "8","selected"); %>>debug</option>
+                                                        <option value="10" <% nvram_match_x("","sqm_log_level", "10","selected"); %>>trace</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    &nbsp;<span style="color:#888;">Only enable debug/trace for debugging.</span>
+                                                </td>
+                                            </tr>
+                </table>
+                                   <table class="table">
+                                            <tr>
+                                                <td colspan="3" style="border-top: 0 none;">
+                                                    <br/>
+                                                    <center>
+                                                        <input class="btn btn-primary" style="width: 219px" type="button" value="<#CTL_apply#>" onclick="applyRule()"/>
+                                                    </center>
+                                            </td>
+                                        </tr>
+                                    </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </form>
+    <div id="footer"></div>
+</div>
+
+<!-- foreign dns list modal -->
+<div class="modal fade" id="bw_calc_dialog" style="left: 60%;width: 300px;overflow: hidden;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">SQM QoS Speed Calculator</h4>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <span style="display: inline-block; width:68px;">Bandwidth</span>:<input type="text" class="span2" style="margin: 1px 5px;" id="bw_in_Mbps" value="10">Mbps
+                </div>
+                <div>
+                    <span style="display: inline-block; width:68px;">Percentage</span>:<input type="text" class="span2" style="margin: 1px 5px;" id="bw_percent" value="95"> %
+                </div>
+                <div                                            <tr>
                                                 <th>启用日志</th>
                                                 <td>
                                                     <div class="main_itoggle">
