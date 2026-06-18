@@ -1,97 +1,59 @@
-name: Build Padavan for NEWIFI3
+name: Build Padavan Firmware
 
 on:
-  workflow_dispatch: # Kích hoạt thủ công từ giao diện Actions Web
+  workflow_dispatch: # Cho phép nhấn nút "Run workflow" thủ công trên web GitHub
+  push:
+    branches:
+      - dev # Tự động build khi có push vào nhánh dev
 
 jobs:
   build:
-    runs-on: ubuntu-22.04 # Sử dụng Ubuntu 22.04 ổn định
+    runs-on: ubuntu-22.04
     steps:
-    - name: Checkout Source Code
-      uses: actions/checkout@v4 # Nâng cấp lên v4 mới nhất
-      with:
-        ref: dev # Chỉ định biên dịch đúng nhánh dev của bạn
+    - name: Checkout Bản vá/Cấu hình của bạn
+      uses: actions/checkout@v4
 
-    - name: Create Symlink to /opt/rt-n56u
+    - name: Cài đặt các gói phụ thuộc (Dependencies)
       run: |
-        # Tạo thư mục và tạo liên kết mềm sang /opt/rt-n56u để sửa lỗi gán cứng đường dẫn của Padavan
-        sudo mkdir -p /opt
-        sudo ln -sf "$GITHUB_WORKSPACE" /opt/rt-n56u
-
-    - name: Configure Fast APT Mirror
-      run: |
-        # Ghi đè trực tiếp địa chỉ máy chủ tải chính thức ổn định của Ubuntu vào file cấu hình ẩn của Microsoft
-        echo "http://archive.ubuntu.com/ubuntu/" | sudo tee /etc/apt/apt-mirrors.txt
-
-    - name: Install Dependencies
-      run: |
-        # 1. Kích hoạt kiến trúc i386 và cài đặt các gói tương thích 32-bit cho Toolchain
-        sudo dpkg --add-architecture i386
         sudo apt-get update
-        sudo apt-get install -y libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 libc6-i386 lib32stdc++6
-        
-        # 2. Cài đặt các gói biên dịch tiêu chuẩn của hệ thống
         sudo apt install unzip libtool-bin curl cmake gperf gawk flex bison nano xxd \
             fakeroot kmod cpio git python3-docutils gettext automake autopoint \
             texinfo build-essential help2man pkg-config zlib1g-dev libgmp3-dev \
             libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget libc-dev-bin \
             libctf-nobfd0 libcunit1-dev libhdf5-dev libopenblas-dev -y
 
-    - name: Prepare Toolchain and Copy Config Files
+    - name: Clone mã nguồn Padavan (yuos-bit)
       run: |
-        # Di chuyển vào đường dẫn ảo /opt/rt-n56u để thao tác đồng bộ
-        cd /opt/rt-n56u
-        
-        # 1. Chép đè file cấu hình bo mạch từ thư mục gốc vào đúng thư mục templates
-        if [ -f "NEWIFI3.config" ]; then
-          mkdir -p trunk/configs/templates
-          cp -f NEWIFI3.config trunk/configs/templates/NEWIFI3.config
-          
-          # ĐỒNG THỜI CHÉP THẲNG THÀNH FILE .config ẨN TRONG THƯ MỤC TRUNK ĐỂ TRÁNH LỖI TRÌNH BUILD KHÔNG TÌM THẤY
-          cp -f NEWIFI3.config trunk/.config
-        fi
-        
-        # 2. Nạp cấu hình nhân, tự động giải đáp các câu hỏi lựa chọn mới (như IMQ_BEHAVIOR)
-        if [ -f "kernel-3.4.x.config" ]; then
-          mkdir -p trunk/linux-3.4.x
-          cp -f kernel-3.4.x.config trunk/linux-3.4.x/.config
-          
-          # Di chuyển vào nhân Linux và chạy lệnh tự động giải đáp lựa chọn mặc định
-          cd trunk/linux-3.4.x
-          yes "" | make oldconfig
-          
-          # Chép ngược file cấu hình nhân đã được giải đáp đầy đủ về thư mục boards chính thức
-          mkdir -p ../configs/boards/NEWIFI3
-          cp -f .config ../configs/boards/NEWIFI3/kernel-3.4.x.config
-          cd ../..
-        fi
-        
-        # 3. Tự động vá lỗi (auto-patch) con trỏ WiFi Driver liên quan đến FOE_MAGIC_TAG trước khi compile
-        find trunk/linux-3.4.x/drivers/net/wireless/ralink/ -type f -name "*.c" -exec sed -i 's/FOE_MAGIC_TAG(pRxPkt)/FOE_MAGIC_TAG(((struct sk_buff *)pRxPkt))/g' {} +
-        
-        # Cấp quyền chạy cho các tệp thực thi chính
-        chmod +x trunk/clear_tree
-        chmod +x trunk/build_firmware_modify
-        chmod +x toolchain-mipsel/dl_toolchain.sh
+        # Clone vào thư mục /opt/rt-n56u giống như hướng dẫn của tác giả
+        sudo git clone --depth=1 https://github.com/yuos-bit/Padavan.git /opt/rt-n56u
+        sudo chown -R $USER:$GROUPS /opt/rt-n56u
 
-    - name: Download Prebuilt Toolchain
+    - name: Cấu hình File Custom (NEWIFI3 & Kernel)
+      run: |
+        # Copy file cấu hình máy từ thư mục gốc repo của bạn vào thư mục template của nguồn Padavan
+        cp -f NEWIFI3.config /opt/rt-n56u/trunk/configs/templates/NEWIFI3.config
+        
+        # Nếu bạn có tùy chỉnh kernel, copy vào đúng vị trí cấu hình kernel tương ứng của chip (Newifi3 dùng mips)
+        if [ -f "kernel-3.4.x.config" ]; then
+          cp -f kernel-3.4.x.config /opt/rt-n56u/trunk/configs/boards/NEWIFI3/kernel-3.4.x.config
+        fi
+
+    - name: Chuẩn bị Toolchain (Mipsel)
       run: |
         cd /opt/rt-n56u/toolchain-mipsel
+        # Sử dụng script download cho nhanh theo khuyến khích của tác giả
         sh dl_toolchain.sh
 
-    - name: Compile Padavan Firmware
+    - name: Compile Firmware
       run: |
         cd /opt/rt-n56u/trunk
         sudo ./clear_tree
-        
-        # Biên dịch trước toàn bộ các thư viện nền tảng (libs_only) của MIPSEL để chuẩn bị zlib, openssl...
-        make libs_only
-        
-        # Tiến hành chạy kịch bản biên dịch firmware chính thức
+        # Chạy lệnh build với tham số truyền vào là NEWIFI3
         fakeroot ./build_firmware_modify NEWIFI3
 
-    - name: Upload Firmware to Artifacts
-      uses: actions/upload-artifact@v4 # Nâng cấp lên v4 mới nhất để tối ưu tốc độ nén và tải lên tệp ROM
+    - name: Gom dữ liệu và Upload Firmware lên GitHub Artifacts
+      uses: actions/upload-artifact@v4
       with:
-        name: Padavan_NEWIFI3_D2
+        name: Padavan_NEWIFI3_Firmware
         path: /opt/rt-n56u/trunk/images/*.trx
+        
