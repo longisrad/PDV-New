@@ -1,4 +1,4 @@
-name: Build Padavan Firmware
+name: Build Padavan Firmware (Manual Toolchain)
 
 on:
   workflow_dispatch: # Cho phép nhấn nút "Run workflow" thủ công trên web GitHub
@@ -38,22 +38,32 @@ jobs:
           cp -f kernel-3.4.x.config /opt/rt-n56u/trunk/configs/boards/NEWIFI3/kernel-3.4.x.config
         fi
 
-    - name: Chuẩn bị Toolchain (Mipsel)
+    - name: Tự Compile Toolchain (Manual Mipsel)
       run: |
         cd /opt/rt-n56u/toolchain-mipsel
-        # Sử dụng script download cho nhanh theo khuyến khích của tác giả
-        sh dl_toolchain.sh
+        
+        # Dọn dẹp các tàn dư cũ nếu có
+        ./clean_toolchain
+        
+        # Tiến hành build toolchain từ mã nguồn (bước này sẽ chạy lâu nhất)
+        ./build_toolchain
 
     - name: Compile Firmware
       run: |
         cd /opt/rt-n56u/trunk
+        
+        # 1. Dọn dẹp cây mã nguồn trước để tránh xung đột cấu hình cũ
         sudo ./clear_tree
-        # Chạy lệnh build với tham số truyền vào là NEWIFI3
+        
+        # 2. Tạo file .config bắt buộc từ file cấu hình NEWIFI3 của bạn vừa đưa vào template
+        cp -f configs/templates/NEWIFI3.config .config
+        
+        # 3. Tiến hành compile cho dòng máy NEWIFI3
         fakeroot ./build_firmware_modify NEWIFI3
 
     - name: Gom dữ liệu và Upload Firmware lên GitHub Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: Padavan_NEWIFI3_Firmware
+        name: Padavan_NEWIFI3_Manual_Toolchain
         path: /opt/rt-n56u/trunk/images/*.trx
         
