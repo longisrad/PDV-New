@@ -151,6 +151,7 @@ dir_$(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS)						+= lua51
 dir_$(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS)                       +=microsocks
 dir_$(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS)            +=ipt2socks
 dir_$(CONFIG_FIRMWARE_INCLUDE_ADGUARDHOME)      	+= adguardhome
+dir_$(CONFIG_FIRMWARE_INCLUDE_QOS)              	+= sqm-qos
 dir_$(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS)	        += dns2tcp
 
 ifeq ($(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS),y)
