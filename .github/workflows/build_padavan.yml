@@ -23,22 +23,20 @@ jobs:
 
     - name: Prepare Toolchain and Copy Config Files
       run: |
-        # 1. Chép đè file cấu hình bo mạch từ thư mục gốc vào đúng thư mục templates của mã nguồn
+        # 1. Chép đè file cấu hình bo mạch từ thư mục gốc vào đúng thư mục templates
         if [ -f "NEWIFI3.config" ]; then
           mkdir -p trunk/configs/templates
           cp -f NEWIFI3.config trunk/configs/templates/NEWIFI3.config
+          
+          # ĐỒNG THỜI CHÉP THẲNG THÀNH FILE .config ẨN TRONG THƯ MỤC TRUNK ĐỂ TRÁNH LỖI TRÌNH BUILD KHÔNG TÌM THẤY
+          cp -f NEWIFI3.config trunk/.config
         fi
         
-        # 2. Chép đè file cấu hình nhân từ thư mục gốc vào đúng thư mục boards của mã nguồn
+        # 2. Chép đè file cấu hình nhân từ thư mục gốc vào đúng thư mục boards
         if [ -f "kernel-3.4.x.config" ]; then
           mkdir -p trunk/configs/boards/NEWIFI3
           cp -f kernel-3.4.x.config trunk/configs/boards/NEWIFI3/kernel-3.4.x.config
         fi
-        
-        # Cấp quyền chạy cho các tệp thực thi chính
-        chmod +x trunk/clear_tree
-        chmod +x trunk/build_firmware_modify
-        chmod +x toolchain-mipsel/dl_toolchain.sh
         
         # Cấp quyền chạy cho các tệp thực thi chính
         chmod +x trunk/clear_tree
