@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04 # Sử dụng Ubuntu 22.04 mượt mà và ổn định
+    runs-on: ubuntu-22.04 # Sử dụng Ubuntu 22.04 ổn định
     steps:
     - name: Checkout Source Code
       uses: actions/checkout@v4 # Nâng cấp lên v4 mới nhất
@@ -25,7 +25,12 @@ jobs:
 
     - name: Install Dependencies
       run: |
+        # 1. Kích hoạt kiến trúc i386 và cài đặt các gói tương thích 32-bit cho Toolchain
+        sudo dpkg --add-architecture i386
         sudo apt-get update
+        sudo apt-get install -y libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 libc6-i386 lib32stdc++6
+        
+        # 2. Cài đặt các gói biên dịch tiêu chuẩn của hệ thống
         sudo apt install unzip libtool-bin curl cmake gperf gawk flex bison nano xxd \
             fakeroot kmod cpio git python3-docutils gettext automake autopoint \
             texinfo build-essential help2man pkg-config zlib1g-dev libgmp3-dev \
