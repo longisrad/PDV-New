@@ -5,12 +5,18 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04 # Nâng cấp lên Ubuntu 22.04 hiện đại và mượt mà hơn
+    runs-on: ubuntu-22.04 # Sử dụng Ubuntu 22.04 mượt mà và ổn định
     steps:
     - name: Checkout Source Code
       uses: actions/checkout@v4 # Nâng cấp lên v4 mới nhất
       with:
         ref: dev # Chỉ định biên dịch đúng nhánh dev của bạn
+
+    - name: Create Symlink to /opt/rt-n56u
+      run: |
+        # Tạo thư mục và tạo liên kết mềm sang /opt/rt-n56u để sửa lỗi gán cứng đường dẫn của Padavan
+        sudo mkdir -p /opt
+        sudo ln -sf "$GITHUB_WORKSPACE" /opt/rt-n56u
 
     - name: Configure Fast APT Mirror
       run: |
@@ -28,6 +34,9 @@ jobs:
 
     - name: Prepare Toolchain and Copy Config Files
       run: |
+        # Di chuyển vào đường dẫn ảo /opt/rt-n56u để thao tác đồng bộ
+        cd /opt/rt-n56u
+        
         # 1. Chép đè file cấu hình bo mạch từ thư mục gốc vào đúng thư mục templates
         if [ -f "NEWIFI3.config" ]; then
           mkdir -p trunk/configs/templates
@@ -62,12 +71,12 @@ jobs:
 
     - name: Download Prebuilt Toolchain
       run: |
-        cd toolchain-mipsel
+        cd /opt/rt-n56u/toolchain-mipsel
         sh dl_toolchain.sh
 
     - name: Compile Padavan Firmware
       run: |
-        cd trunk
+        cd /opt/rt-n56u/trunk
         sudo ./clear_tree
         
         # Biên dịch trước toàn bộ các thư viện nền tảng (libs_only) của MIPSEL để chuẩn bị zlib, openssl...
@@ -80,4 +89,4 @@ jobs:
       uses: actions/upload-artifact@v4 # Nâng cấp lên v4 mới nhất để tối ưu tốc độ nén và tải lên tệp ROM
       with:
         name: Padavan_NEWIFI3_D2
-        path: trunk/images/*.trx
+        path: /opt/rt-n56u/trunk/images/*.trx
