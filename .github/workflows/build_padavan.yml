@@ -1,16 +1,16 @@
 name: Build Padavan for NEWIFI3
 
 on:
-  workflow_dispatch: # Cho phép nhấn nút kích hoạt biên dịch thủ công từ giao diện Web
+  workflow_dispatch: # Kích hoạt thủ công từ giao diện Actions Web
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04 # Nâng cấp lên Ubuntu 22.04 hiện đại và mượt mà hơn
     steps:
     - name: Checkout Source Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4 # Nâng cấp lên v4 mới nhất
       with:
-        ref: dev # Chỉ định biên dịch nhánh dev của bạn
+        ref: dev # Chỉ định biên dịch đúng nhánh dev của bạn
 
     - name: Install Dependencies
       run: |
@@ -23,13 +23,15 @@ jobs:
 
     - name: Prepare Toolchain and Copy Config Files
       run: |
-        # 1. Chép đè file cấu hình bo mạch NEWIFI3 đã tối ưu vào đúng vị trí
-        if [ -f "NEWIFI3.config.txt" ]; then
-          cp -f NEWIFI3.config.txt trunk/configs/boards/NEWIFI3/board.config
+        # 1. Chép đè file cấu hình bo mạch NEWIFI3.config ở thư mục gốc vào đúng vị trí nhận diện
+        if [ -f "NEWIFI3.config" ]; then
+          mkdir -p trunk/configs/boards/NEWIFI3
+          cp -f NEWIFI3.config trunk/configs/boards/NEWIFI3/board.config
         fi
         
-        # 2. Chép đè file cấu hình nhân kernel-3.4.x đã tối ưu vào đúng vị trí
+        # 2. Chép đè file cấu hình nhân kernel-3.4.x.config ở thư mục gốc vào đúng vị trí nhận diện
         if [ -f "kernel-3.4.x.config" ]; then
+          mkdir -p trunk/configs/boards/NEWIFI3
           cp -f kernel-3.4.x.config trunk/configs/boards/NEWIFI3/kernel-3.4.x.config
         fi
         
@@ -50,7 +52,7 @@ jobs:
         fakeroot ./build_firmware_modify NEWIFI3
 
     - name: Upload Firmware to Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4 # Nâng cấp lên v4 mới nhất để tối ưu tốc độ nén và tải lên tệp ROM
       with:
         name: Padavan_NEWIFI3_D2
         path: trunk/images/*.trx
