@@ -12,6 +12,11 @@ jobs:
       with:
         ref: dev # Chỉ định biên dịch đúng nhánh dev của bạn
 
+    - name: Configure Fast APT Mirror
+      run: |
+        # Chuyển đổi máy chủ tải từ azure.archive sang mirrors.edge.kernel.org để đạt tốc độ tải cực nhanh, chống nghẽn mạng
+        sudo sed -i 's/azure.archive.ubuntu.com/mirrors.edge.kernel.org/g' /etc/apt/sources.list
+
     - name: Install Dependencies
       run: |
         sudo apt-get update
