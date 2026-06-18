@@ -306,6 +306,18 @@ EOF
 ### Custom user script
 ### Called after internal iptables reconfig (firewall update)
 
+# === ĐIỀU KHIỂN HOẠT ĐỘNG SQM QOS ===
+sqm_enable=\$(nvram get sqm_enable)
+
+if [ "\$sqm_enable" = "1" ] && [ -x /usr/bin/sqm-qos ]; then
+    /usr/bin/sqm-qos start
+else
+    if [ -x /usr/bin/sqm-qos ]; then
+        /usr/bin/sqm-qos stop
+    fi
+fi
+EOF
+
 #wing resume
 
 EOF
