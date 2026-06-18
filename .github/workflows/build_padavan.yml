@@ -37,10 +37,19 @@ jobs:
           cp -f NEWIFI3.config trunk/.config
         fi
         
-        # 2. Chép đè file cấu hình nhân từ thư mục gốc vào đúng thư mục boards
+        # 2. Nạp cấu hình nhân, tự động giải đáp các câu hỏi lựa chọn mới (như IMQ_BEHAVIOR)
         if [ -f "kernel-3.4.x.config" ]; then
-          mkdir -p trunk/configs/boards/NEWIFI3
-          cp -f kernel-3.4.x.config trunk/configs/boards/NEWIFI3/kernel-3.4.x.config
+          mkdir -p trunk/linux-3.4.x
+          cp -f kernel-3.4.x.config trunk/linux-3.4.x/.config
+          
+          # Di chuyển vào nhân Linux và chạy lệnh tự động giải đáp lựa chọn mặc định
+          cd trunk/linux-3.4.x
+          yes "" | make oldconfig
+          
+          # Chép ngược file cấu hình nhân đã được giải đáp đầy đủ về thư mục boards chính thức
+          mkdir -p ../configs/boards/NEWIFI3
+          cp -f .config ../configs/boards/NEWIFI3/kernel-3.4.x.config
+          cd ../..
         fi
         
         # Cấp quyền chạy cho các tệp thực thi chính
