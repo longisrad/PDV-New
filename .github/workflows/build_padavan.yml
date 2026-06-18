@@ -69,6 +69,11 @@ jobs:
       run: |
         cd trunk
         sudo ./clear_tree
+        
+        # Biên dịch trước toàn bộ các thư viện nền tảng (libs_only) của MIPSEL để chuẩn bị zlib, openssl...
+        make libs_only
+        
+        # Tiến hành chạy kịch bản biên dịch firmware chính thức
         fakeroot ./build_firmware_modify NEWIFI3
 
     - name: Upload Firmware to Artifacts
