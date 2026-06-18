@@ -52,6 +52,9 @@ jobs:
           cd ../..
         fi
         
+        # 3. Tự động vá lỗi (auto-patch) con trỏ WiFi Driver liên quan đến FOE_MAGIC_TAG trước khi compile
+        find trunk/linux-3.4.x/drivers/net/wireless/ralink/ -type f -name "*.c" -exec sed -i 's/FOE_MAGIC_TAG(pRxPkt)/FOE_MAGIC_TAG(((struct sk_buff *)pRxPkt))/g' {} +
+        
         # Cấp quyền chạy cho các tệp thực thi chính
         chmod +x trunk/clear_tree
         chmod +x trunk/build_firmware_modify
