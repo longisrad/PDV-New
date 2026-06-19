@@ -27,9 +27,8 @@ jobs:
         sudo git clone --depth=1 https://github.com/yuos-bit/Padavan.git /opt/rt-n56u
         sudo chown -R $USER:$GROUPS /opt/rt-n56u
 
-    - name: Cấu hình File Custom (NEWIFI3)
+    - name: Cấu hình File Custom (Kernel)
       run: |
-        cp -f NEWIFI3.config /opt/rt-n56u/trunk/configs/templates/NEWIFI3.config
         if [ -f "kernel-3.4.x.config" ]; then
           cp -f kernel-3.4.x.config /opt/rt-n56u/trunk/configs/boards/NEWIFI3/kernel-3.4.x.config
         fi
@@ -44,6 +43,13 @@ jobs:
       run: |
         cd /opt/rt-n56u/trunk
         sudo ./clear_tree
+        
+        # Copy lại SAU clear_tree
+        cp -f $GITHUB_WORKSPACE/NEWIFI3.config configs/templates/NEWIFI3.config
+        
+        # Tạo .config thủ công luôn cho chắc
+        cp -f configs/templates/NEWIFI3.config .config
+        
         fakeroot ./build_firmware_modify NEWIFI3
 
     - name: Upload Firmware
@@ -51,3 +57,4 @@ jobs:
       with:
         name: Padavan_NEWIFI3_Manual_Toolchain
         path: /opt/rt-n56u/trunk/images/*.trx
+        
