@@ -1,10 +1,10 @@
 name: Build Padavan Firmware (Manual Toolchain)
 
 on:
-  workflow_dispatch: # Cho phép nhấn nút "Run workflow" thủ công trên web GitHub
+  workflow_dispatch:
   push:
     branches:
-      - dev # Tự động build khi có push vào nhánh dev
+      - dev
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
     - name: Checkout Bản vá/Cấu hình của bạn
       uses: actions/checkout@v4
 
-    - name: Cài đặt các gói phụ thuộc (Dependencies)
+    - name: Cài đặt Dependencies
       run: |
         sudo apt-get update
         sudo apt install unzip libtool-bin curl cmake gperf gawk flex bison nano xxd \
@@ -22,48 +22,32 @@ jobs:
             libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget libc-dev-bin \
             libctf-nobfd0 libcunit1-dev libhdf5-dev libopenblas-dev -y
 
-    - name: Clone mã nguồn Padavan (yuos-bit)
+    - name: Clone mã nguồn Padavan
       run: |
-        # Clone vào thư mục /opt/rt-n56u giống như hướng dẫn của tác giả
         sudo git clone --depth=1 https://github.com/yuos-bit/Padavan.git /opt/rt-n56u
         sudo chown -R $USER:$GROUPS /opt/rt-n56u
 
-    - name: Cấu hình File Custom (NEWIFI3 & Kernel)
+    - name: Cấu hình File Custom (NEWIFI3)
       run: |
-        # Copy file cấu hình máy từ thư mục gốc repo của bạn vào thư mục template của nguồn Padavan
         cp -f NEWIFI3.config /opt/rt-n56u/trunk/configs/templates/NEWIFI3.config
-        
-        # Nếu bạn có tùy chỉnh kernel, copy vào đúng vị trí cấu hình kernel tương ứng của chip (Newifi3 dùng mips)
         if [ -f "kernel-3.4.x.config" ]; then
           cp -f kernel-3.4.x.config /opt/rt-n56u/trunk/configs/boards/NEWIFI3/kernel-3.4.x.config
         fi
 
-    - name: Tự Compile Toolchain (Manual Mipsel)
+    - name: Tự Compile Toolchain (Manual)
       run: |
         cd /opt/rt-n56u/toolchain-mipsel
-        
-        # Dọn dẹp các tàn dư cũ nếu có
         ./clean_toolchain
-        
-        # Tiến hành build toolchain từ mã nguồn (bước này sẽ chạy lâu nhất)
         ./build_toolchain
 
     - name: Compile Firmware
       run: |
         cd /opt/rt-n56u/trunk
-        
-        # 1. Dọn dẹp cây mã nguồn trước để tránh xung đột cấu hình cũ
         sudo ./clear_tree
-        
-        # 2. Tạo file .config bắt buộc từ file cấu hình NEWIFI3 của bạn vừa đưa vào template
-        cp -f configs/templates/NEWIFI3.config .config
-        
-        # 3. Tiến hành compile cho dòng máy NEWIFI3
         fakeroot ./build_firmware_modify NEWIFI3
 
-    - name: Gom dữ liệu và Upload Firmware lên GitHub Artifacts
+    - name: Upload Firmware
       uses: actions/upload-artifact@v4
       with:
         name: Padavan_NEWIFI3_Manual_Toolchain
         path: /opt/rt-n56u/trunk/images/*.trx
-        
